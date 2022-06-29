@@ -1,0 +1,36 @@
+{
+	"bugs": "",
+	"contributors": [],
+	"dependencies": {
+		"cbyaml": "^1.0.5"
+	},
+	"description": "",
+	"homepage": "",
+	"ignore": [
+		"**/.*",
+		"/test/",
+		"/tests/"
+	],
+	"installPaths": {
+		"cbyaml": "modules/cbyaml/"
+	},
+	"instructions": "",
+	"keywords": [],
+	"license": [{
+		"type": "",
+		"URL": ""
+	}],
+	"location": "ForgeboxStorage",
+	"name": "commandbox-jasper",
+	"private": false,
+	"projectURL": "",
+	"repository": {
+		"type": "",
+		"URL": ""
+	},
+	"scripts": {},
+	"shortDescription": "A sweet package",
+	"slug": "commandbox-jasper",
+	"type": "modules",
+	"version": "0.0.0"
+}
