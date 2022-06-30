@@ -1,4 +1,4 @@
-component {
+component accessors="true" singleton {
 
 	property name="JasperService";
 	property name="YamlService" inject="Parser@cbyaml";
