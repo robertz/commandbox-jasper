@@ -28,7 +28,7 @@ component extends="commandbox.system.BaseCommand" {
 		// Build all posts
 		var files = JasperService.list( path = fileSystemUtil.resolvePath( "src/posts" ) );
 		files.each( ( file ) => {
-			print.line( "Generating file for: " & file.name );
+			print.line( "Generating... dist/post/" & file.name.listFirst( "." ) & ".html" );
 
 			var html = "";
 			var prc  = {
@@ -54,12 +54,12 @@ component extends="commandbox.system.BaseCommand" {
 		} );
 
 		tags.each( ( tag ) => {
-			print.line( "Generating... dist/tag/" & tag.replace( " ", "-", "all" ) & ".html" );
+			print.line( "Generating... dist/tag/" & lCase( tag ).replace( " ", "-", "all" ) & ".html" );
 
 			var html = "";
 			var prc  = {
 				"meta"     : {},
-				"tag"      : tag,
+				"tag"      : lCase( tag ),
 				"posts"    : [],
 				"html"     : "",
 				"tagCloud" : tags
@@ -70,7 +70,7 @@ component extends="commandbox.system.BaseCommand" {
 				return post.tags.findNoCase( prc.tag );
 			} );
 
-			prc.meta.title &= " - " & prc.tag;
+			prc.meta.title &= " - " & lCase( prc.tag );
 
 			savecontent variable="html" {
 				include fileSystemUtil.resolvePath( "src/tags.cfm" );
