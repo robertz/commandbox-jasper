@@ -1,28 +1,32 @@
 {
-	"name": "commandbox-jasper",
-	"version": "0.3.0",
-	"location": "ForgeboxStorage",
-	"author": "Robert Zehnder <robert@kisdigital.com>",
-	"homepage": "https://github.com/robertz/commandbox-jasper",
-	"repository": {
-		"type": "Git",
-		"URL": "https://github.com/robertz/commandbox-jasper"
-	},
-	"bugs": "https://github.com/robertz/commandbox-jasper/issues",
-	"slug": "commandbox-jasper",
-	"description": "A static site generator implemented in Commandbox",
-	"instructions": "",
-	"type": "commandbox-modules",
-	"dependencies": {
-		"cbyaml": "^1.0.5"
-	},
-	"ignore": [
-		"**/.*",
-		"/test/",
-		"/tests/"
-	],
-	"installPaths": {
-		"cbyaml": "modules/cbyaml/"
-	},
-	"keywords": ["jasper", "blog", "ssg"]
+    "name":"commandbox-jasper",
+    "version":"0.4.0",
+    "location":"ForgeboxStorage",
+    "author":"Robert Zehnder <robert@kisdigital.com>",
+    "homepage":"https://github.com/robertz/commandbox-jasper",
+    "repository":{
+        "type":"Git",
+        "URL":"https://github.com/robertz/commandbox-jasper"
+    },
+    "bugs":"https://github.com/robertz/commandbox-jasper/issues",
+    "slug":"commandbox-jasper",
+    "description":"A static site generator implemented in Commandbox",
+    "instructions":"",
+    "type":"commandbox-modules",
+    "dependencies":{
+        "cbyaml":"^1.0.5"
+    },
+    "ignore":[
+        "**/.*",
+        "/test/",
+        "/tests/"
+    ],
+    "installPaths":{
+        "cbyaml":"modules/cbyaml/"
+    },
+    "keywords":[
+        "jasper",
+        "blog",
+        "ssg"
+    ]
 }
