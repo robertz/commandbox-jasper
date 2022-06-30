@@ -1,38 +1,36 @@
 {
-    "bugs":"",
-    "contributors":[],
-    "dependencies":{
-        "cbyaml":"^1.0.5"
-    },
-    "description":"",
-    "homepage":"",
-    "ignore":[
-        "**/.*",
-        "/test/",
-        "/tests/"
-    ],
-    "installPaths":{
-        "cbyaml":"modules/cbyaml/"
-    },
-    "instructions":"",
-    "keywords":[],
-    "license":[
-        {
-            "type":"",
-            "URL":""
-        }
-    ],
-    "location":"ForgeboxStorage",
-    "name":"commandbox-jasper",
-    "private":false,
-    "projectURL":"https://github.com/robertz/commandbox-jasper",
-    "repository":{
-        "type":"",
-        "URL":"https://github.com/robertz/commandbox-jasper"
-    },
-    "scripts":{},
-    "shortDescription":"A sweet package",
-    "slug":"commandbox-jasper",
-    "type":"modules",
-    "version":"0.1.0"
+	"bugs": "",
+	"contributors": [],
+	"dependencies": {
+		"cbyaml": "^1.0.5"
+	},
+	"description": "",
+	"homepage": "",
+	"ignore": [
+		"**/.*",
+		"/test/",
+		"/tests/"
+	],
+	"installPaths": {
+		"cbyaml": "modules/cbyaml/"
+	},
+	"instructions": "",
+	"keywords": [],
+	"license": [{
+		"type": "",
+		"URL": ""
+	}],
+	"location": "ForgeboxStorage",
+	"name": "commandbox-jasper",
+	"private": false,
+	"projectURL": "https://github.com/robertz/commandbox-jasper",
+	"repository": {
+		"type": "",
+		"URL": "https://github.com/robertz/commandbox-jasper"
+	},
+	"scripts": {},
+	"shortDescription": "A static site generator implemented in Commandbox",
+	"slug": "commandbox-jasper",
+	"type": "modules",
+	"version": "0.1.0"
 }

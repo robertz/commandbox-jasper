@@ -36,6 +36,17 @@ component {
 		return payload;
 	}
 
+
+	function getTags( required array posts ) {
+		var tags  = [];
+		var posts = arguments.posts;
+		// Calculate tags
+		posts.each( function( post ) {
+			for ( var tag in post.tags ) if ( !tags.find( tag ) ) tags.append( tag );
+		} );
+		return tags;
+	}
+
 	function list( required string path ) {
 		return directoryList( path, false, "query" )
 	}
