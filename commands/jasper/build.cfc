@@ -4,9 +4,29 @@ component extends="commandbox.system.BaseCommand" {
 	property name="JasperService" inject="JasperService@commandbox-jasper";
 
 	function run() {
+		command( "jasper cache build" ).run();
+
 		var conf  = deserializeJSON( fileRead( fileSystemUtil.resolvePath( "jasperconfig.json" ), "utf-8" ) );
+		var posts = deserializeJSON( fileRead( fileSystemUtil.resolvePath( "post-cache.json" ), "utf-8" ) );
+
+		var html = "";
+		var prc  = {
+			"meta"  : {},
+			"posts" : posts,
+			"html"  : ""
+		};
+		// get the home page
+		savecontent variable="html" {
+			include fileSystemUtil.resolvePath( "src/index.cfm" );
+		}
+
+		fileWrite( fileSystemUtil.resolvePath( "dist/index.html" ), html );
+
+		// Build all posts
 		var files = JasperService.list( path = fileSystemUtil.resolvePath( "src/posts" ) );
 		files.each( ( file ) => {
+			print.line( "Generating file for: " & file.name );
+
 			var html = "";
 			var prc  = {
 				"meta" : {},
@@ -23,19 +43,6 @@ component extends="commandbox.system.BaseCommand" {
 
 			fileWrite( fileSystemUtil.resolvePath( "dist/post/" & prc.post.slug & ".html" ), html );
 		} );
-	}
-
-	function run2() {
-		var fn    = fileSystemUtil.resolvePath( "src/posts/getting-started.md" );
-		var data  = JasperService.getPostData( fname = fn );
-		data.body = processor.toHTML( data.body );
-
-		print.line(
-			command( "execute" )
-				.params( file = "src/test.cfm", json = data.toJSON() )
-				.overwrite( "dist/test.html" )
-				.run( returnOutput = true )
-		)
 	}
 
 }
