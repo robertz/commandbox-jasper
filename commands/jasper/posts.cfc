@@ -2,7 +2,7 @@ component extends="commandbox.system.BaseCommand" {
 
 	function run() {
 		var files = directoryList(
-			fileSystemUtil.resolvePath( "posts" ),
+			fileSystemUtil.resolvePath( "src/posts" ),
 			false,
 			"query"
 		);
