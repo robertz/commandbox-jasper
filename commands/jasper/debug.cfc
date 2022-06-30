@@ -1,40 +1,41 @@
 component extends="commandbox.system.BaseCommand" {
 
-	property name="processor" inject="processor@commandbox-jasper";
-
-	function getMarkdown( required string slug, required string fname ) {
-		var data = {
-			"slug"     : slug,
-			"markdown" : "",
-			"status"   : "error"
-		};
-
-		// file operation
-		if ( fileExists( fname ) ) {
-			var openFile = fileOpen( fname, "read" );
-			var lines    = [];
-			try {
-				while ( !fileIsEOF( openFile ) ) {
-					arrayAppend( lines, fileReadLine( openFile ) );
-				}
-			} catch ( any e ) {
-				rethrow;
-			} finally {
-				fileClose( openFile );
-			}
-			var fme = lines.findAll( "---" )[ 2 ]; // front matter end
-			lines.each( ( line, row ) => {
-				if ( row > fme ) data[ "markdown" ] &= line.len() ? ( line & chr( 10 ) ) : ( " " & chr( 10 ) );
-			} );
-			data.status = lines.len() ? "ok" : "error";
-		}
-
-		return data.markdown;
-	}
+	property name="processor"     inject="processor@commandbox-jasper";
+	property name="JasperService" inject="JasperService@commandbox-jasper";
 
 	function run() {
-		var markd = getMarkdown( "getting-started", "src/posts/getting-started.md" );
-		fileWrite( "cache/getting-started.html", processor.toHTML( markd ) );
+		var conf  = deserializeJSON( fileRead( fileSystemUtil.resolvePath( "jasperconfig.json" ), "utf-8" ) );
+		var files = JasperService.list( path = fileSystemUtil.resolvePath( "src/posts" ) );
+		files.each( ( file ) => {
+			var html = "";
+			var prc  = {
+				"meta" : {},
+				"post" : {},
+				"html" : ""
+			};
+			prc.meta.append( conf.meta );
+			prc.post.append(
+				JasperService.getPostData( fname = fileSystemUtil.resolvePath( "src/posts/" & file.name ) )
+			);
+			savecontent variable="html" {
+				include fileSystemUtil.resolvePath( "src/post.cfm" );
+			}
+
+			fileWrite( fileSystemUtil.resolvePath( "dist/post/" & prc.post.slug & ".html" ), html );
+		} );
+	}
+
+	function run2() {
+		var fn    = fileSystemUtil.resolvePath( "src/posts/getting-started.md" );
+		var data  = JasperService.getPostData( fname = fn );
+		data.body = processor.toHTML( data.body );
+
+		print.line(
+			command( "execute" )
+				.params( file = "src/test.cfm", json = data.toJSON() )
+				.overwrite( "dist/test.html" )
+				.run( returnOutput = true )
+		)
 	}
 
 }
