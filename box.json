@@ -34,5 +34,5 @@
     "shortDescription":"A static site generator implemented in Commandbox",
     "slug":"commandbox-jasper",
     "type":"modules",
-    "version":"0.2.0"
+    "version":"0.3.0"
 }
