@@ -1,5 +1,6 @@
 component {
 
+	property name="JasperService";
 	property name="YamlService" inject="Parser@cbyaml";
 	property name="processor"   inject="processor@commandbox-jasper";
 
