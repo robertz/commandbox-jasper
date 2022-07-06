@@ -9,10 +9,10 @@ component accessors="true" singleton {
 	}
 
 	function getPostData( required string fname ) {
-		var payload = {};
-		var yaml    = "";
-		var body    = "";
-
+		var payload  = {};
+		var yaml     = "";
+		var body     = "";
+		var isCFM    = fname.findNoCase( ".cfm" ) ? true : false;
 		var openFile = fileOpen( fname, "read" );
 		var lines    = [];
 		try {
@@ -24,14 +24,14 @@ component accessors="true" singleton {
 		} finally {
 			fileClose( openFile );
 		}
-		var fme = lines.findAll( "---" )[ 2 ]; // front matter end
+		var fme = !isCFM ? lines.findAll( "---" )[ 2 ] : lines.findAll( "--->" )[ 1 ]; // front matter end
 		lines.each( ( line, index ) => {
 			if ( index > 1 && index < fme ) yaml &= lines[ index ] & chr( 10 );
 			if ( index > fme ) body &= lines[ index ] & chr( 10 );
 		} )
 		var frontMatter = YamlService.deserialize( trim( yaml ) );
 
-		var payload = { "html" : processor.toHtml( body ) };
+		var payload = { "content" : processor.toHtml( body ) };
 		payload.append( frontMatter );
 
 		return payload;
@@ -49,7 +49,15 @@ component accessors="true" singleton {
 	}
 
 	function list( required string path ) {
-		return directoryList( path, false, "query" )
+		var templates = directoryList( path, true, "query", "*.md|*.cfm" );
+		templates     = queryExecute(
+			"
+			SELECT * FROM templates t
+			WHERE t.directory NOT LIKE '%_includes%' AND t.directory NOT LIKE '%_site%'",
+			[],
+			{ "dbtype" : "query" }
+		);
+		return templates;
 	}
 
 }

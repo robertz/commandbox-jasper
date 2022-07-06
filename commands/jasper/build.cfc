@@ -1,83 +1,68 @@
 component extends="commandbox.system.BaseCommand" {
 
-	property name="processor"     inject="processor@commandbox-jasper";
 	property name="JasperService" inject="JasperService@commandbox-jasper";
 
 	function run() {
 		command( "jasper cache build" ).run();
 
-		var conf  = deserializeJSON( fileRead( fileSystemUtil.resolvePath( "jasperconfig.json" ), "utf-8" ) );
-		var posts = deserializeJSON( fileRead( fileSystemUtil.resolvePath( "post-cache.json" ), "utf-8" ) );
+		var conf  = deserializeJSON( fileRead( resolvePath( "_data/jasperconfig.json" ), "utf-8" ) );
+		var posts = deserializeJSON( fileRead( resolvePath( "_data/post-cache.json" ), "utf-8" ) );
 		var tags  = JasperService.getTags( posts );
 
-		var html = "";
-		var prc  = {
-			"meta"     : {},
-			"posts"    : posts,
-			"html"     : "",
-			"tagCloud" : JasperService.getTags( posts )
-		};
-		prc.meta.append( conf.meta );
-		// get the home page
-		savecontent variable="html" {
-			include fileSystemUtil.resolvePath( "src/index.cfm" );
-		}
+		var rootDir = resolvePath( "." );
+		rootDir     = left( rootDir, len( rootDir ) - 1 )
 
-		fileWrite( fileSystemUtil.resolvePath( "dist/index.html" ), html );
+		print.line( "Building source directory: " & rootDir );
 
-		// Build all posts
-		var files = JasperService.list( path = fileSystemUtil.resolvePath( "src/posts" ) );
-		files.each( ( file ) => {
-			print.line( "Generating... dist/post/" & file.name.listFirst( "." ) & ".html" );
+		var templateList = JasperService.list( rootDir );
 
-			var html = "";
-			var prc  = {
+		templateList.each( ( template ) => {
+			var fragment     = "";
+			var content      = "";
+			var renderedHTML = "";
+
+			var prc = {
 				"meta"     : {},
-				"post"     : {},
-				"html"     : "",
-				"tagCloud" : tags
+				"content"  : "",
+				"tagCloud" : tags,
+				"type"     : "page"
 			};
-			prc.meta.append( conf.meta );
-			prc.post.append(
-				JasperService.getPostData( fname = fileSystemUtil.resolvePath( "src/posts/" & file.name ) )
-			);
 
-			prc.meta.title &= " - " & prc.post.title;
+			prc.append( conf );
+			prc.append( JasperService.getPostData( fname = template.directory & "/" & template.name ) );
 
-			savecontent variable="html" {
-				include fileSystemUtil.resolvePath( "src/post.cfm" );
+			if ( prc.keyExists( "type" ) && prc.type == "page" ) {
+				savecontent variable="fragment" {
+					include resolvePath( template.directory & "/" & template.name );
+				}
+			} else {
+				savecontent variable="fragment" {
+					include resolvePath( "_includes/post.cfm" );
+				}
 			}
 
-			fileWrite( fileSystemUtil.resolvePath( "dist/post/" & prc.post.slug & ".html" ), html );
+			content = fragment;
 
-			// build tags
+			// render the layout
+			savecontent variable="fragment" {
+				include resolvePath( "_includes/layouts/" & prc.layout & ".cfm" );
+			}
+
+			renderedHTML = fragment;
+
+			var computedPath = template.directory.replace( rootDir, "" );
+
+			if ( prc.keyExists( "type" ) && prc.type == "page" ) {
+				print.line( "_site/" & computedPath & listFirst( template.name, "." ) & ".html" );
+				fileWrite(
+					resolvePath( "_site/" & computedPath & listFirst( template.name, "." ) & ".html" ),
+					renderedHTML
+				);
+			} else {
+				print.line( "_site" & computedPath & "/" & prc.slug & ".html" );
+				fileWrite( resolvePath( "_site" & computedPath & "/" & prc.slug & ".html" ), renderedHTML );
+			}
 		} );
-
-		tags.each( ( tag ) => {
-			print.line( "Generating... dist/tag/" & lCase( tag ).replace( " ", "-", "all" ) & ".html" );
-
-			var html = "";
-			var prc  = {
-				"meta"     : {},
-				"tag"      : lCase( tag ),
-				"posts"    : [],
-				"html"     : "",
-				"tagCloud" : tags
-			};
-			prc.meta.append( conf.meta );
-
-			prc.posts = posts.filter( ( post ) => {
-				return post.tags.findNoCase( prc.tag );
-			} );
-
-			prc.meta.title &= " - " & lCase( prc.tag );
-
-			savecontent variable="html" {
-				include fileSystemUtil.resolvePath( "src/tags.cfm" );
-			}
-
-			fileWrite( fileSystemUtil.resolvePath( "dist/tag/" & tag.replace( " ", "-", "all" ) & ".html" ), html );
-		} )
 	}
 
 }

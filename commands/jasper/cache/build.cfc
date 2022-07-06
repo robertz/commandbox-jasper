@@ -5,13 +5,13 @@ component extends="commandbox.system.BaseCommand" {
 	function run() {
 		var posts = [];
 		var files = directoryList(
-			fileSystemUtil.resolvePath( "src/posts" ),
+			fileSystemUtil.resolvePath( "posts" ),
 			false,
 			"query"
 		);
 
 		files.each( ( file ) => {
-			var postData = JasperService.getPostData( fileSystemUtil.resolvePath( "src/posts/" & file.name ) );
+			var postData = JasperService.getPostData( fileSystemUtil.resolvePath( "posts/" & file.name ) );
 			postData.delete( "html" );
 			posts.append( postData );
 		} );
@@ -20,7 +20,7 @@ component extends="commandbox.system.BaseCommand" {
 		} );
 
 		print.line( "Writing post-cache.json" );
-		fileWrite( fileSystemUtil.resolvePath( "post-cache.json" ), serializeJSON( posts ) );
+		fileWrite( fileSystemUtil.resolvePath( "_data/post-cache.json" ), serializeJSON( posts ) );
 	}
 
 }
