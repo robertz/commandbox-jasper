@@ -25,7 +25,8 @@ component extends="commandbox.system.BaseCommand" {
 				"meta"     : {},
 				"content"  : "",
 				"tagCloud" : tags,
-				"type"     : "page"
+				"type"     : "page",
+				"posts"    : posts
 			};
 
 			prc.append( conf );
