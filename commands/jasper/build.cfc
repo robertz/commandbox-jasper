@@ -26,6 +26,7 @@ component extends="commandbox.system.BaseCommand" {
 		fileWrite( fileSystemUtil.resolvePath( "dist/index.html" ), html );
 
 		// Build all posts
+		directoryCreate( fileSystemUtil.resolvePath( "dist/post/" ), true, true );
 		var files = JasperService.list( path = fileSystemUtil.resolvePath( "src/posts" ) );
 		files.each( ( file ) => {
 			print.line( "Generating... dist/post/" & file.name.listFirst( "." ) & ".html" );
@@ -50,9 +51,10 @@ component extends="commandbox.system.BaseCommand" {
 
 			fileWrite( fileSystemUtil.resolvePath( "dist/post/" & prc.post.slug & ".html" ), html );
 
-			// build tags
 		} );
 
+		// build tags
+		directoryCreate( fileSystemUtil.resolvePath( "dist/tag/" ), true, true );
 		tags.each( ( tag ) => {
 			print.line( "Generating... dist/tag/" & lCase( tag ).replace( " ", "-", "all" ) & ".html" );
 
