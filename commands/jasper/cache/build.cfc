@@ -13,6 +13,7 @@ component extends="commandbox.system.BaseCommand" {
 		files.each( ( file ) => {
 			var postData = JasperService.getPostData( fileSystemUtil.resolvePath( "posts/" & file.name ) );
 			postData.delete( "html" );
+			postData.delete( "content" );
 			posts.append( postData );
 		} );
 		posts.sort( ( e1, e2 ) => {

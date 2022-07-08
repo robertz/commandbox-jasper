@@ -1,4 +1,4 @@
-component accessors="true" singleton {
+component accessors="true" {
 
 	property name="JasperService";
 	property name="YamlService" inject="Parser@cbyaml";
@@ -53,11 +53,93 @@ component accessors="true" singleton {
 		templates     = queryExecute(
 			"
 			SELECT * FROM templates t
-			WHERE t.directory NOT LIKE '%_includes%' AND t.directory NOT LIKE '%_site%'",
+			WHERE t.directory NOT LIKE '%_includes%' AND t.directory NOT LIKE '%_site%' and t.name NOT LIKE 'readme.md'",
 			[],
 			{ "dbtype" : "query" }
 		);
 		return templates;
+	}
+
+	function writeTemplate(
+		required struct prc,
+		required struct template,
+		required string rootDir
+	) {
+		var renderedHtml = "";
+		var computedPath = template.directory.replace( rootDir, "" );
+
+		directoryCreate(
+			rootDir & "/_site/" & computedPath,
+			true,
+			true
+		);
+
+		// render the view
+		switch ( lCase( prc.type ) ) {
+			case "post":
+				savecontent variable="renderedHtml" {
+					include rootDir & "/_includes/post.cfm";
+				}
+				break;
+			default:
+				// page
+				if ( template.name.findNoCase( ".cfm" ) ) {
+					// we are rending a CFM file, just include it
+					savecontent variable="renderedHtml" {
+						include template.directory & "/" & template.name;
+					}
+				} else {
+					// use the page template
+					savecontent variable="renderedHtml" {
+						include rootDir & "/_includes/page.cfm";
+					}
+				}
+				break;
+		}
+		var renderedHtml = "";
+
+		// render the view
+		switch ( lCase( prc.type ) ) {
+			case "post":
+				savecontent variable="renderedHtml" {
+					include rootDir & "/_includes/post.cfm";
+				}
+				break;
+			default:
+				// page
+				if ( template.name.findNoCase( ".cfm" ) ) {
+					// we are rending a CFM file, just include it
+					savecontent variable="renderedHtml" {
+						include template.directory & "/" & template.name;
+					}
+				} else {
+					// use the page template
+					savecontent variable="renderedHtml" {
+						include rootDir & "/_includes/page.cfm";
+					}
+				}
+				break;
+		}
+
+		savecontent variable="renderedHtml" {
+			include rootDir & "/_includes/layouts/" & prc.layout & ".cfm";
+		}
+
+		var fname     = "";
+		var shortName = "";
+		switch ( lCase( prc.type ) ) {
+			case "post":
+				shortName = computedPath & "/" & prc.slug & ".html";
+				break;
+			default:
+				shortName = computedPath & "/" & listFirst( template.name, "." ) & ".html";
+				break;
+		}
+		fname = rootDir & "/_site/" & shortName;
+
+		fileWrite( fname, renderedHtml );
+
+		return shortName;
 	}
 
 }
