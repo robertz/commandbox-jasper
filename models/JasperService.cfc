@@ -60,13 +60,9 @@ component accessors="true" {
 		return templates;
 	}
 
-	function writeTemplate(
-		required struct prc,
-		required struct template,
-		required string rootDir
-	) {
+	function writeTemplate( required struct prc ) {
 		var renderedHtml = "";
-		var computedPath = template.directory.replace( rootDir, "" );
+		var computedPath = prc.directory.replace( prc.rootDir, "" );
 
 		directoryCreate(
 			rootDir & "/_site/" & computedPath,
@@ -78,20 +74,20 @@ component accessors="true" {
 		switch ( lCase( prc.type ) ) {
 			case "post":
 				savecontent variable="renderedHtml" {
-					include rootDir & "/_includes/post.cfm";
+					include prc.rootDir & "/_includes/post.cfm";
 				}
 				break;
 			default:
 				// page
-				if ( template.name.findNoCase( ".cfm" ) ) {
+				if ( prc.file.findNoCase( ".cfm" ) ) {
 					// we are rending a CFM file, just include it
 					savecontent variable="renderedHtml" {
-						include template.directory & "/" & template.name;
+						include prc.directory & "/" & prc.file;
 					}
 				} else {
 					// use the page template
 					savecontent variable="renderedHtml" {
-						include rootDir & "/_includes/page.cfm";
+						include prc.rootDir & "/_includes/page.cfm";
 					}
 				}
 				break;
@@ -102,27 +98,27 @@ component accessors="true" {
 		switch ( lCase( prc.type ) ) {
 			case "post":
 				savecontent variable="renderedHtml" {
-					include rootDir & "/_includes/post.cfm";
+					include prc.rootDir & "/_includes/post.cfm";
 				}
 				break;
 			default:
 				// page
-				if ( template.name.findNoCase( ".cfm" ) ) {
+				if ( prc.file.findNoCase( ".cfm" ) ) {
 					// we are rending a CFM file, just include it
 					savecontent variable="renderedHtml" {
-						include template.directory & "/" & template.name;
+						include prc.directory & "/" & prc.file;
 					}
 				} else {
 					// use the page template
 					savecontent variable="renderedHtml" {
-						include rootDir & "/_includes/page.cfm";
+						include prc.rootDir & "/_includes/page.cfm";
 					}
 				}
 				break;
 		}
 
 		savecontent variable="renderedHtml" {
-			include rootDir & "/_includes/layouts/" & prc.layout & ".cfm";
+			include prc.rootDir & "/_includes/layouts/" & prc.layout & ".cfm";
 		}
 
 		var fname     = "";
@@ -132,10 +128,10 @@ component accessors="true" {
 				shortName = computedPath & "/" & prc.slug & ".html";
 				break;
 			default:
-				shortName = computedPath & "/" & listFirst( template.name, "." ) & ".html";
+				shortName = computedPath & "/" & listFirst( prc.file, "." ) & ".html";
 				break;
 		}
-		fname = rootDir & "/_site/" & shortName;
+		fname = prc.rootDir & "/_site/" & shortName;
 
 		fileWrite( fname, renderedHtml );
 

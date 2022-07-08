@@ -26,17 +26,23 @@ component extends="commandbox.system.BaseCommand" {
 		var rootDir = resolvePath( "." );
 		rootDir     = left( rootDir, len( rootDir ) - 1 );
 
+		// clear the template cache
+		systemCacheClear( "template" );
+
 		print.line( "Building source directory: " & rootDir );
 
 		var templateList = JasperService.list( rootDir );
 
 		templateList.each( ( template ) => {
 			var prc = {
-				"meta"     : {},
-				"content"  : "",
-				"tagCloud" : tags,
-				"type"     : "page",
-				"posts"    : posts
+				"rootDir"   : rootDir,
+				"directory" : template.directory,
+				"file"      : template.name,
+				"meta"      : {},
+				"content"   : "",
+				"tagCloud"  : tags,
+				"type"      : "page",
+				"posts"     : posts
 			};
 			prc.append( conf );
 			// Try reading the front matter from the template
