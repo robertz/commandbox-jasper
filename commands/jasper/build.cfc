@@ -4,20 +4,13 @@ component extends="commandbox.system.BaseCommand" {
 
 	function run() {
 		command( "jasper cache build" ).run();
-		command( "rm" )
-			.params(
-				path    = resolvePath( "_site" ),
-				recurse = true,
-				force   = true
-			)
-			.run();
-		command( "cp" )
-			.params(
-				path    = resolvepath( "assets" ),
-				newPath = resolvePath( "_site/assets" ),
-				recurse = true
-			)
-			.run();
+
+		directoryDelete( resolvePath( "_site" ), true );
+		directoryCopy(
+			resolvePath( "assets" ),
+			resolvePath( "_site/assets" ),
+			true
+		);
 
 		var conf  = deserializeJSON( fileRead( resolvePath( "_data/jasperconfig.json" ), "utf-8" ) );
 		var posts = deserializeJSON( fileRead( resolvePath( "_data/post-cache.json" ), "utf-8" ) );
@@ -26,9 +19,17 @@ component extends="commandbox.system.BaseCommand" {
 		var rootDir = resolvePath( "." );
 		rootDir     = left( rootDir, len( rootDir ) - 1 );
 
+		<  <  <  <  <  <  < Updated upstream
+		===  ===  =
+		// clear the template cache
+		systemCacheClear();
+
+		>  >  >  >  >  >  > Stashed changes
 		print.line( "Building source directory: " & rootDir );
 
 		var templateList = JasperService.list( rootDir );
+
+		print.line( templateList );
 
 		templateList.each( ( template ) => {
 			var prc = {
