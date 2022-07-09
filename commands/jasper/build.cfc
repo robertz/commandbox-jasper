@@ -19,12 +19,9 @@ component extends="commandbox.system.BaseCommand" {
 		var rootDir = resolvePath( "." );
 		rootDir     = left( rootDir, len( rootDir ) - 1 );
 
-		<  <  <  <  <  <  < Updated upstream
-		===  ===  =
 		// clear the template cache
 		systemCacheClear();
 
-		>  >  >  >  >  >  > Stashed changes
 		print.line( "Building source directory: " & rootDir );
 
 		var templateList = JasperService.list( rootDir );

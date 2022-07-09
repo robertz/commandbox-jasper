@@ -50,14 +50,16 @@ component accessors="true" {
 
 	function list( required string path ) {
 		var templates = directoryList( path, true, "query", "*.md|*.cfm" );
-		templates     = queryExecute(
-			"
-			SELECT * FROM templates t
-			WHERE t.directory NOT LIKE '%_includes%' AND t.directory NOT LIKE '%_site%' and t.name NOT LIKE 'readme.md'",
-			[],
-			{ "dbtype" : "query" }
-		);
-		return templates;
+
+		// templates = queryExecute(
+		// 	"
+		// 		SELECT *
+		// 		FROM templates t
+		// 		WHERE lcase(t.directory) NOT LIKE '%_includes%' AND lcase(t.directory) NOT LIKE '%_site%' and lcase(t.name) NOT LIKE 'readme.md'",
+		// 	[],
+		// 	{ "dbtype" : "query" }
+		// );
+		return templates
 	}
 
 	function writeTemplate(
