@@ -51,14 +51,14 @@ component accessors="true" {
 	function list( required string path ) {
 		var templates = directoryList( path, true, "query", "*.md|*.cfm" );
 
-		// templates = queryExecute(
-		// 	"
-		// 		SELECT *
-		// 		FROM templates t
-		// 		WHERE lcase(t.directory) NOT LIKE '%_includes%' AND lcase(t.directory) NOT LIKE '%_site%' and lcase(t.name) NOT LIKE 'readme.md'",
-		// 	[],
-		// 	{ "dbtype" : "query" }
-		// );
+		templates = queryExecute(
+			"
+				SELECT *
+				FROM templates t
+				WHERE lcase(t.directory) NOT LIKE '%_includes%'",
+			[],
+			{ "dbtype" : "query" }
+		);
 		return templates
 	}
 

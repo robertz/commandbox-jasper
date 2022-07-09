@@ -31,7 +31,7 @@ component {
 				true
 			);
 			fileWrite(
-				file.directory.replace( "/jasper-cli", "" ) & "/" & file.name,
+				trim( file.directory.replace( "/jasper-cli", "" ) & "/" & file.name ),
 				fileRead( file.directory & "/" & file.name ),
 				"utf-8"
 			);
