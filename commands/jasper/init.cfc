@@ -7,7 +7,6 @@ component {
 		if ( contents.len() ) {
 			return error( "Directory is not empty." );
 		}
-		print.yellowText( "Scaffolding project..." );
 
 		command( "coldbox create app" )
 			.params(
@@ -35,7 +34,7 @@ component {
 				fileRead( file.directory & "/" & file.name ),
 				"utf-8"
 			);
-			print.line( "Writing " & file.directory.replace( "/jasper-cli", "" ) & "/" & file.name );
+			print.greenLine( "Writing " & file.directory.replace( "/jasper-cli", "" ) & "/" & file.name );
 		} );
 
 		directoryDelete( resolvePath( "jasper-cli" ), true );
