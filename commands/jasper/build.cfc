@@ -31,6 +31,7 @@ component extends="commandbox.system.BaseCommand" {
 				"rootDir"   : rootDir,
 				"directory" : template.directory,
 				"file"      : template.name,
+				"headers"   : [],
 				"meta"      : {},
 				"content"   : "",
 				"tagCloud"  : tags,

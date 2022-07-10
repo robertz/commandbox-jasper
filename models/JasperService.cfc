@@ -24,15 +24,19 @@ component accessors="true" {
 		} finally {
 			fileClose( openFile );
 		}
-		try {
+		// front matter should be at the start of the file
+		var fms = !isCFM ? lines.find( "---" ) : lines.find( "<!---" ); // front matter start
+
+		if ( fms == 1 ) {
 			var fme = !isCFM ? lines.findAll( "---" )[ 2 ] : lines.findAll( "--->" )[ 1 ]; // front matter end
 			lines.each( ( line, index ) => {
 				if ( index > 1 && index < fme ) yaml &= lines[ index ] & chr( 10 );
 				if ( index > fme ) body &= lines[ index ] & chr( 10 );
-			} )
-		} catch ( any e ) {
+			} );
+		} else {
 			body = arrayToList( lines, chr( 10 ) );
 		}
+
 		// recover gracefully if no frontmatter present
 		var frontMatter = {};
 		if ( yaml.len() ) frontMatter.append( YamlService.deserialize( trim( yaml ) ) );
