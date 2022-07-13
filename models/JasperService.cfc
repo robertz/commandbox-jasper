@@ -11,7 +11,7 @@ component accessors="true" {
 	/**
 	 *  Reads a template and returns front matter and template data
 	 */
-	function getPostData( required string fname ) {
+	function getTemplateData( required string fname ) {
 		var payload  = {};
 		var yaml     = "";
 		var body     = "";
@@ -78,42 +78,29 @@ component accessors="true" {
 	}
 
 	/**
-	 * Handles writing a template to disk
+	 * Render a template
 	 */
-	function writeTemplate( required struct prc ) {
+	function renderTemplate( required struct prc, required struct collections ) {
 		var renderedHtml = "";
 		var computedPath = prc.directory.replace( prc.rootDir, "" );
-		directoryCreate(
-			prc.rootDir & "/_site/" & computedPath,
-			true,
-			true
-		);
 		// render the view based on prc.type
-		if ( prc.file.findNoCase( ".cfm" ) ) {
+		if ( prc.inFile.findNoCase( ".cfm" ) ) {
 			savecontent variable="renderedHtml" {
-				include prc.directory & "/" & prc.file;
+				include prc.directory & "/" & prc.fileSlug & ".cfm";
 			}
 		} else {
 			savecontent variable="renderedHtml" {
 				include prc.rootDir & "/_includes/" & prc.type & ".cfm";
 			}
 		}
-		savecontent variable="renderedHtml" {
-			include prc.rootDir & "/_includes/layouts/" & prc.layout & ".cfm";
+		// skip layout if "none" is specified
+		if ( prc.layout != "none" ) {
+			savecontent variable="renderedHtml" {
+				include prc.rootDir & "/_includes/layouts/" & prc.layout & ".cfm";
+			}
 		}
-		var fname     = "";
-		var shortName = "";
-		switch ( lCase( prc.type ) ) {
-			case "post":
-				shortName = computedPath & "/" & prc.slug & ".html";
-				break;
-			default:
-				shortName = computedPath & "/" & listFirst( prc.file, "." ) & ".html";
-				break;
-		}
-		fname = prc.rootDir & "/_site/" & shortName;
-		fileWrite( fname, renderedHtml );
-		return shortName;
+		// a little whitespace management
+		return trim( renderedHtml );
 	}
 
 }

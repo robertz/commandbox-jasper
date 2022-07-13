@@ -11,7 +11,7 @@ component extends="commandbox.system.BaseCommand" {
 		);
 
 		files.each( ( file ) => {
-			var postData = JasperService.getPostData( fileSystemUtil.resolvePath( "posts/" & file.name ) );
+			var postData = JasperService.getTemplateData( fileSystemUtil.resolvePath( "posts/" & file.name ) );
 			postData.delete( "html" );
 			postData.delete( "content" );
 			posts.append( postData );
