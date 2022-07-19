@@ -51,11 +51,16 @@ component extends="commandbox.system.BaseCommand" {
 				"outFile"                : "",
 				"headers"                : [],
 				"meta"                   : {},
+				// core properties
+				"title"                  : "",
+				"description"            : "",
+				"image"                  : "",
+				"published"              : false,
+				"publishDate"            : "",
+				// other
 				"content"                : "",
-				"tagCloud"               : tags,
 				"type"                   : "page",
 				"layout"                 : "main",
-				"posts"                  : posts,
 				"permalink"              : true,
 				"fileExt"                : "html",
 				"excludeFromCollections" : false
@@ -77,7 +82,61 @@ component extends="commandbox.system.BaseCommand" {
 				prc.fileExt   = len( ext ) ? ext : "html";
 			}
 
+			// handle facebook/twitter meta
+			switch ( prc.type ) {
+				case "post":
+					prc.meta.title &= " - " & prc.title;
+					// set social tags
+					prc.headers.append( {
+						"property" : "og:title",
+						"content"  : "#prc.title#"
+					} );
+					prc.headers.append( {
+						"property" : "og:description",
+						"content"  : "#prc.description#"
+					} );
+					prc.headers.append( {
+						"property" : "og:image",
+						"content"  : "#prc.image#"
+					} );
+					prc.headers.append( {
+						"name"    : "twitter:card",
+						"content" : "summary_large_image"
+					} );
+					prc.headers.append( {
+						"name"    : "twitter:title",
+						"content" : "#prc.title#"
+					} );
+					prc.headers.append( {
+						"name"    : "twitter:description",
+						"content" : "#prc.description#"
+					} );
+					prc.headers.append( {
+						"name"    : "twitter:image",
+						"content" : "#prc.image#"
+					} );
+					break;
+				default:
+					break;
+			};
+
+
 			collections.all.append( prc );
+		} ); // templateList each
+
+		// build posts
+		collections[ "posts" ] = collections.all.filter( ( post ) => {
+			return post.type == "post"
+		} );
+		// descending date sort
+		collections.posts.sort( ( e1, e2 ) => {
+			return dateCompare( e2.publishDate, e1.publishDate );
+		} );
+
+		// build tags
+		collections[ "tags" ] = [];
+		collections.posts.each( ( post ) => {
+			for ( var tag in post.tags ) if ( !collections.tags.find( tag ) ) collections.tags.append( tag );
 		} );
 
 		collections.all.each( ( prc ) => {
@@ -99,7 +158,8 @@ component extends="commandbox.system.BaseCommand" {
 				true
 			);
 			fileWrite( fname, JasperService.renderTemplate( prc = prc, collections = collections ) );
-		} );
+		} ); // collections.all.each
+
 		print.greenLine( "Compiled " & collections.all.len() & " template(s) in " & ( getTickCount() - startTime ) & "ms." )
 	}
 
