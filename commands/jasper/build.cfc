@@ -172,6 +172,7 @@ component extends="commandbox.system.BaseCommand" {
 			}
 		} );
 
+		// write the files
 		collections.all.each( ( prc ) => {
 			var computedPath = prc.directory.replace( prc.rootDir, "" );
 
