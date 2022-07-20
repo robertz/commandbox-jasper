@@ -23,8 +23,6 @@ component extends="commandbox.system.BaseCommand" {
 		var rootDir = resolvePath( "." );
 		rootDir     = left( rootDir, len( rootDir ) - 1 ); // remove trailing slash to match directoryList query
 
-		command( "jasper cache build" ).run();
-
 		if ( directoryExists( rootDir & "/_site" ) ) directoryDelete( rootDir & "/_site", true );
 
 		directoryCopy(
@@ -33,24 +31,28 @@ component extends="commandbox.system.BaseCommand" {
 			true
 		);
 
-		var conf  = deserializeJSON( fileRead( rootDir & "/_data/jasperconfig.json", "utf-8" ) );
-		var posts = deserializeJSON( fileRead( rootDir & "/_data/post-cache.json", "utf-8" ) );
-		var tags  = JasperService.getTags( posts );
+		var conf = deserializeJSON( fileRead( rootDir & "/_data/jasperconfig.json", "utf-8" ) );
 
 		print.yellowLine( "Building source directory: " & rootDir );
 
 		var templateList = JasperService.list( rootDir );
-		var collections  = { "all" : [] };
+		var collections  = { "all" : [], "tags" : [] };
 
+		// build initial prc
 		templateList.each( ( template ) => {
 			var prc = {
-				"rootDir"                : rootDir,
-				"directory"              : template.directory,
-				"fileSlug"               : template.name.listFirst( "." ),
-				"inFile"                 : template.directory & "/" & template.name,
-				"outFile"                : "",
-				"headers"                : [],
-				"meta"                   : {},
+				"rootDir"   : rootDir,
+				"directory" : template.directory,
+				"fileSlug"  : template.name.listFirst( "." ),
+				"inFile"    : template.directory & "/" & template.name,
+				"outFile"   : "",
+				"headers"   : [],
+				"meta"      : {
+					"title"       : "",
+					"description" : "",
+					"author"      : "",
+					"url"         : ""
+				},
 				// core properties
 				"title"                  : "",
 				"description"            : "",
@@ -65,7 +67,10 @@ component extends="commandbox.system.BaseCommand" {
 				"fileExt"                : "html",
 				"excludeFromCollections" : false
 			};
-			prc.append( conf );
+
+			// ensure the config does not mutate
+			prc.append( duplicate( conf ) );
+
 			// Try reading the front matter from the template
 			prc.append( JasperService.getTemplateData( fname = template.directory & "/" & template.name ) );
 
@@ -85,7 +90,7 @@ component extends="commandbox.system.BaseCommand" {
 			// handle facebook/twitter meta
 			switch ( prc.type ) {
 				case "post":
-					prc.meta.title &= " - " & prc.title;
+					prc.meta.title = prc.meta.title & " - " & prc.title;
 					// set social tags
 					prc.headers.append( {
 						"property" : "og:title",
@@ -120,23 +125,51 @@ component extends="commandbox.system.BaseCommand" {
 					break;
 			};
 
-
 			collections.all.append( prc );
 		} ); // templateList each
 
-		// build posts
-		collections[ "posts" ] = collections.all.filter( ( post ) => {
-			return post.type == "post"
+		// build template list by type
+		collections.all.each( ( template ) => {
+			if ( !collections.keyExists( template.type ) ) collections[ template.type ] = [];
+			collections[ lCase( template.type ) ].append( template )
 		} );
+
 		// descending date sort
-		collections.posts.sort( ( e1, e2 ) => {
+		collections.post.sort( ( e1, e2 ) => {
 			return dateCompare( e2.publishDate, e1.publishDate );
 		} );
 
 		// build tags
-		collections[ "tags" ] = [];
-		collections.posts.each( ( post ) => {
-			for ( var tag in post.tags ) if ( !collections.tags.find( tag ) ) collections.tags.append( tag );
+		collections[ "tags" ]  = [];
+		collections[ "byTag" ] = {};
+
+		collections.post.each( ( post ) => {
+			for ( var tag in post.tags ) {
+				if ( !collections.tags.find( tag ) ) {
+					collections.tags.append( {
+						"text" : tag,
+						"slug" : JasperService.generateSlug( input = tag )
+					} );
+				}
+
+				if ( !collections.byTag.keyExists( tag ) )
+					collections.byTag[ JasperService.generateSlug( input = tag ) ] = [];
+				collections.byTag[ JasperService.generateSlug( input = tag ) ].append( post );
+			}
+		} );
+
+		// process pagination
+		collections.all.each( ( prc ) => {
+			if ( prc.keyExists( "pagination" ) ) {
+				var data = prc.pagination.data.findNoCase( "collections." ) == 1 ? structGet( prc.pagination.data ) : structGet( "prc." & prc.pagination.data );
+
+				prc[ "pagination" ][ "pagedData" ] = [];
+
+				prc.pagination.pagedData.append(
+					JasperService.paginate( data = data, pageSize = prc.pagination.size ),
+					true
+				);
+			}
 		} );
 
 		collections.all.each( ( prc ) => {
