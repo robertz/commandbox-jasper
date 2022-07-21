@@ -2,6 +2,11 @@ component extends="commandbox.system.BaseCommand" {
 
 	property name="JasperService" inject="JasperService@commandbox-jasper";
 
+	/**
+	 * Calculate the output filename
+	 *
+	 * @prc request context for the page
+	 */
 	function getOutfile( required struct prc ) {
 		var outFile = "";
 		if ( prc.type == "page" ) {
@@ -16,6 +21,25 @@ component extends="commandbox.system.BaseCommand" {
 		return outfile;
 	}
 
+	/**
+	 * Calculate permalink
+	 *
+	 * @prc request context for the page
+	 */
+	function getPermalink( required struct prc ) {
+		var permalink = "";
+		permalink     = prc.outFile
+			.replace( prc.rootDir & "/_site", "" )
+			.listToArray( "/" )
+			.reverse();
+		if ( prc.fileExt == "html" ) permalink[ 1 ] = listFirst( permalink[ 1 ], "." );
+		if ( permalink[ 1 ] == "index" ) permalink[ 1 ] = "";
+		return "/" & permalink.reverse().toList( "/" );
+	}
+
+	/**
+	 * Generate jasper static site
+	 */
 	function run() {
 		var startTime = getTickCount();
 		// clear the template cache
@@ -85,6 +109,8 @@ component extends="commandbox.system.BaseCommand" {
 
 				prc.permalink = "/" & temp.reverse().toList( "/" );
 				prc.fileExt   = len( ext ) ? ext : "html";
+			} else {
+				prc.permalink = getPermalink( prc );
 			}
 
 			// handle facebook/twitter meta
