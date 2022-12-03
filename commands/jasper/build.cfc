@@ -169,9 +169,17 @@ component extends="commandbox.system.BaseCommand" {
 		collections[ "tags" ]  = [];
 		collections[ "byTag" ] = {};
 
+		// build the taglist
 		collections.post.each( ( post ) => {
 			for ( var tag in post.tags ) {
-				if ( !collections.tags.find( tag ) ) {
+				if (
+					!collections.tags
+						.filter( ( f ) => {
+							return f.text == tag;
+						} )
+						.len()
+				) {
+					// Add to the tag list
 					collections.tags.append( {
 						"text" : tag,
 						"slug" : JasperService.generateSlug( input = tag )
@@ -196,6 +204,9 @@ component extends="commandbox.system.BaseCommand" {
 					true
 				);
 			}
+		} );
+
+		collections.byTag.each( ( tag ) => {
 		} );
 
 		// write the files
