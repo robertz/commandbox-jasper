@@ -41,21 +41,35 @@ component extends="commandbox.system.BaseCommand" {
 	 * Generate jasper static site
 	 */
 	function run() {
+		// make generateSlug available to the variables scope
+		variables.generateSlug = JasperService.generateSlug;
+
+
 		var startTime = getTickCount();
 		// clear the template cache
 		systemCacheClear();
 		var rootDir = resolvePath( "." );
 		rootDir     = left( rootDir, len( rootDir ) - 1 ); // remove trailing slash to match directoryList query
 
+		// delete the _site directory if it exists
 		if ( directoryExists( rootDir & "/_site" ) ) directoryDelete( rootDir & "/_site", true );
-
-		directoryCopy(
-			rootDir & "/assets",
-			rootDir & "/_site/assets",
-			true
-		);
-
+		// recreate the directory
+		directoryCreate( rootDir & "/_site" );
+		// get the configuration
 		var conf = deserializeJSON( fileRead( rootDir & "/_data/jasperconfig.json", "utf-8" ) );
+
+		// passthru directories
+		for ( var dir in conf.passthru ) {
+			if ( fileExists( rootDir & dir ) ) {
+				fileCopy( rootDir & dir, rootDir & "/_site" & dir )
+			} else {
+				directoryCopy(
+					rootDir & dir,
+					rootDir & "/_site" & dir,
+					true
+				);
+			}
+		}
 
 		print.yellowLine( "Building source directory: " & rootDir );
 
@@ -172,23 +186,13 @@ component extends="commandbox.system.BaseCommand" {
 		// build the taglist
 		collections.post.each( ( post ) => {
 			for ( var tag in post.tags ) {
-				if (
-					!collections.tags
-						.filter( ( f ) => {
-							return f.text == tag;
-						} )
-						.len()
-				) {
-					// Add to the tag list
-					collections.tags.append( {
-						"text" : tag,
-						"slug" : JasperService.generateSlug( input = tag )
-					} );
+				if ( !collections.tags.findNoCase( tag ) ) {
+					collections.tags.append( tag );
 				}
 
-				if ( !collections.byTag.keyExists( tag ) )
-					collections.byTag[ JasperService.generateSlug( input = tag ) ] = [];
-				collections.byTag[ JasperService.generateSlug( input = tag ) ].append( post );
+				var slugifiedTag = JasperService.generateSlug( input = tag );
+				if ( !collections.byTag.keyExists( slugifiedTag ) ) collections.byTag[ slugifiedTag ] = [];
+				collections.byTag[ slugifiedTag ].append( post );
 			}
 		} );
 
@@ -197,16 +201,27 @@ component extends="commandbox.system.BaseCommand" {
 			if ( prc.keyExists( "pagination" ) ) {
 				var data = prc.pagination.data.findNoCase( "collections." ) == 1 ? structGet( prc.pagination.data ) : structGet( "prc." & prc.pagination.data );
 
-				prc[ "pagination" ][ "pagedData" ] = [];
+				var targetKey = prc.pagination.keyExists( "alias" ) ? prc.pagination.alias : "pagedData";
 
-				prc.pagination.pagedData.append(
+				prc[ "pagination" ][ targetKey ] = [];
+
+				prc.pagination[ targetKey ].append(
 					JasperService.paginate( data = data, pageSize = prc.pagination.size ),
 					true
 				);
-			}
-		} );
 
-		collections.byTag.each( ( tag ) => {
+				// prc.pagination[ targetKey ].each( ( el ) => {
+				// 	variables[ targetKey ]= el;
+				// 	var dupPRC            = duplicate( prc );
+				// 	savecontent variable  ="dupPRC.content" {
+				// 		writeOutput( prc.content );
+				// 	};
+				// 	dupPRC.permalink.replace( "{{" & targetKey & "}}", el );
+				// 	dupPRC.outFile.replace( "{{" & targetKey & "}}", el );
+				// 	collections.all.append( dupPRC );
+				// } );
+				// generate paginated template
+			}
 		} );
 
 		// write the files
@@ -228,7 +243,8 @@ component extends="commandbox.system.BaseCommand" {
 				true,
 				true
 			);
-			fileWrite( fname, JasperService.renderTemplate( prc = prc, collections = collections ) );
+			if ( !prc.permalink.find( "{{" ) )
+				fileWrite( fname, JasperService.renderTemplate( prc = prc, collections = collections ) );
 		} ); // collections.all.each
 
 		print.greenLine( "Compiled " & collections.all.len() & " template(s) in " & ( getTickCount() - startTime ) & "ms." )

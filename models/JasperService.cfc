@@ -102,10 +102,15 @@ component accessors="true" {
 	function paginate( required array data, required numeric pageSize ) {
 		var output       = [];
 		var currentChunk = 1;
-		output[ 1 ]      = [];
+
+		if ( pageSize > 1 ) output[ 1 ] = [];
 		data.each( ( item, index ) => {
-			output[ currentChunk ].append( item );
-			if ( index % pageSize == 0 && index < data.len() ) output[ ++currentChunk ] = [];
+			if ( pageSize > 1 ) {
+				output[ currentChunk ].append( item );
+			} else {
+				output.append( item );
+			}
+			if ( index % pageSize == 0 && index < data.len() && pageSize > 1 ) output[ ++currentChunk ] = [];
 		} );
 		return output;
 	}
